@@ -396,7 +396,7 @@ echo     → Queries AbuseIPDB for IP abuse reports using an API key.
 echo       Requires you to input your AbuseIPDB API key manually.
 
 echo [38;2;128;0;0m[14][0m Speed Test
-echo     → Not implemented. (No corresponding label exists.)
+echo     → Checks the speed of your internet.
 
 echo [38;2;128;0;0m[15][0m WiFi Passwords
 echo     → Shows saved WiFi profiles and their passwords.
