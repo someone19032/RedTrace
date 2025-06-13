@@ -1,10 +1,11 @@
 @echo off
 chcp 65001 >nul
 title RedTrace - By kao_someone on DC (bintyzz)
-setlocal enabledelayedexpansion
+powershell exit >nul
 goto :main
 
 :main
+setlocal enabledelayedexpansion
 for /f %%A in ('"prompt $H &echo on &for %%B in (1) do rem"') do set BS=%%A
 set /a spacessCount=36
 set "spacess="
@@ -61,9 +62,10 @@ if "%choice%"=="21" goto vpntest
 if "%choice%"=="24" exit
 if "%choice%"=="23" goto help
 if "%choice%"=="22" goto privlocator
-
-echo %leftpad%[38;2;255;0;0mInvalid selection![0m
-timeout /t 1 >nul
+setlocal DisableDelayedExpansion
+echo %leftpad%[38;2;255;0;0m[!] Invalid selection![0m
+endlocal
+timeout /t 2 >nul
 goto main
 
 
@@ -97,9 +99,10 @@ pause >nul
 goto :main
 
 :blacklist
+setlocal EnableDelayedExpansion
 cls
 if not defined ABUSEIPDB_KEY (
-    echo [38;2;255;255;0m[!] No AbuseIPDB API key set[0m
+    echo [38;2;255;255;0m[^!^] No AbuseIPDB API key set[0m
     set /p ABUSEIPDB_KEY=Enter AbuseIPDB API Key: 
     set /p ip=[38;2;128;0;0mEnter IP to check:[0m 
 ) else (
@@ -226,18 +229,57 @@ pause
 goto main
 
 :geolookup
+setlocal EnableDelayedExpansion
+chcp 65001 >nul
 cls
 set /p ip=[38;2;128;0;0mEnter IP address: [0m
-curl -s "http://ip-api.com/json/%ip%?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,proxy" > temp.json
-findstr /C:"\"status\":\"success\"" temp.json >nul
+if "%ip%"=="" (
+    endlocal
+    setlocal DisableDelayedExpansion
+    echo [38;2;255;0;13m[!] Please enter an IP address.[0m
+    pause >nul
+    cls
+    endlocal
+    goto :main
+)
+
+curl -s ipinfo.io/%ip% > ipinfo.json
+
 if errorlevel 1 (
     echo [38;2;255;0;0m[!] Failed to retrieve info. Check your IP or connection.[0m
-) else (
-    type temp.json
+    del ipinfo.json >nul 2>&1
+    pause >nul
+    goto :main
 )
-del temp.json
+
+echo.
+echo [38;2;0;200;255m[+] Geo Information:[0m
+echo.
+
+for %%G in (
+    "ip=IP"
+    "hostname=HostName"
+    "city=City"
+    "region=Region"
+    "country=Country"
+    "loc=Location"
+    "org=Org"
+    "postal=Postal"
+    "timezone=Timezone"
+) do (
+    for /f "tokens=1,2 delims==" %%a in ("%%~G") do (
+        for /f "tokens=2 delims=:" %%i in ('findstr /i "%%a" ipinfo.json') do (
+            set "value=%%i"
+            set "value=!value:~1,-1!"
+            set "value=!value:"=!"
+            echo [38;2;200;200;200m%%b: !value![0m
+        )
+    )
+)
+
+del ipinfo.json >nul 2>&1
 pause >nul
-goto main
+goto :main
 
 :myip
 cls
@@ -313,8 +355,10 @@ echo [38;2;128;0;0mDetecting local IP address...[0m
 for /f "tokens=2 delims=:" %%a in ('ipconfig ^| findstr /i "IPv4"') do set LOCAL_IP=%%a
 set LOCAL_IP=%LOCAL_IP:~1%
 if not defined LOCAL_IP (
+    setlocal DisableDelayedExpansion
     echo [38;2;255;0;0mCould not detect local IP address.[0m
     pause >nul
+    endlocal
     goto main
 )
 for /f "tokens=1,2,3 delims=." %%b in ("!LOCAL_IP!") do set PREFIX=%%b.%%c.%%d
@@ -396,7 +440,7 @@ echo     → Queries AbuseIPDB for IP abuse reports using an API key.
 echo       Requires you to input your AbuseIPDB API key manually.
 
 echo [38;2;128;0;0m[14][0m Speed Test
-echo     → Checks the speed of your internet.
+echo     → Not implemented. (No corresponding label exists.)
 
 echo [38;2;128;0;0m[15][0m WiFi Passwords
 echo     → Shows saved WiFi profiles and their passwords.
@@ -443,7 +487,7 @@ set /p ip=[38;2;128;0;0mEnter IP address for WHOIS lookup: [0m
 curl -s "https://ipwhois.app/json/%ip%" > temp.json
 findstr /C:"\"success\":true" temp.json >nul
 if errorlevel 1 (
-    echo [38;2;255;0;0m[!] Failed to retrieve info. Check your IP or connection.[0m
+    echo [38;2;255;0;0m[^!^] Failed to retrieve info. Check your IP or connection.[0m
 ) else (
     type temp.json
 )
